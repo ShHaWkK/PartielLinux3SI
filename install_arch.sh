@@ -35,11 +35,13 @@ echo "Partition de boot créée"
 
 parted -s $DISK set 1 esp on 
 echo "Partition de boot définie comme ESP"
+
 # partition racine chiffrée
+
 parted -s $DISK mkpart primary ext4 513MiB 100%
 echo "Partition racine créée"
 
-parted -s $DISK print # affiche les partitions
+parted -s $DISK print
 echo "Partitions créées et affichées"
 
 # Formater la partition EFI
@@ -52,7 +54,7 @@ echo "Chiffrement de la partition principale terminé"
 echo -n "$LUKS_PASS" | cryptsetup open "${DISK}2" cryptlvm -
 echo "Ouverture de la partition chiffrée"
 
-# Création des volumes LVM
+### Création des volumes LVM ###
 echo "Création des volumes LVM..."
 pvcreate /dev/mapper/cryptlvm
 vgcreate vg0 /dev/mapper/cryptlvm
@@ -71,11 +73,17 @@ mkfs.ext4 /dev/vg0/shared
 mkfs.ext4 /dev/vg0/virtualbox
 mkswap /dev/vg0/swap
 
-# Chiffrement du volume
+### Chiffrement du volume LUKS ###
+echo "Chiffrement du volume LUCKS extra..."
 echo -n "$LUKS_PASS" | cryptsetup luksFormat /dev/vg0/luks_extra -
+echo "Chiffrement du volume LUCKS extra terminé"
+echo "Ouverture du volume chiffré"
 echo -n "$LUKS_PASS" | cryptsetup open /dev/vg0/luks_extra luks_manual -
+echo "Volume chiffré ouvert"
+
 
 ### Montage des partitions ###
+echo "Montage des partitions..."
 mount /dev/vg0/root /mnt
 mkdir -p /mnt/{boot,home,shared,virtualbox}
 mount "${DISK}1" /mnt/boot
