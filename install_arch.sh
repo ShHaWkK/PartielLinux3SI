@@ -70,3 +70,18 @@ mkfs.ext4 /dev/vg0/home
 mkfs.ext4 /dev/vg0/shared
 mkfs.ext4 /dev/vg0/virtualbox
 mkswap /dev/vg0/swap
+
+# Chiffrement du volume
+echo -n "$LUKS_PASS" | cryptsetup luksFormat /dev/vg0/luks_extra -
+echo -n "$LUKS_PASS" | cryptsetup open /dev/vg0/luks_extra luks_manual -
+
+### Montage des partitions ###
+mount /dev/vg0/root /mnt
+mkdir -p /mnt/{boot,home,shared,virtualbox}
+mount "${DISK}1" /mnt/boot
+mount /dev/vg0/home /mnt/home
+mount /dev/vg0/shared /mnt/shared
+mount /dev/vg0/virtualbox /mnt/virtualbox
+swapon /dev/vg0/swap
+
+
