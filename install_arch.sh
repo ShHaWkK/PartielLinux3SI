@@ -4,14 +4,14 @@ set -e
 LOGFILE="/root/arch_install.log"
 exec > >(tee -a "$LOGFILE") 2>&1
 set -x
-
+###################################
 DISK="/dev/sda"
 HOSTNAME="archlinux"
 USER1="pere"
 USER2="fils"
 USER_PASS="azerty123"
 LUKS_PASS="azerty123"
-
+###################################
 echo "### Début de l'installation d'Arch Linux ###"
 
 # Partitionnement
@@ -58,7 +58,7 @@ echo "Suppression des paquets corrompus..."
 rm -rf /mnt/var/cache/pacman/pkg/*
 echo "Installation des paquets de base..."
 pacstrap /mnt base linux linux-firmware lvm2 sudo nano vim networkmanager
-
+###################################
 # Fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
@@ -91,6 +91,7 @@ systemctl enable NetworkManager
 systemctl enable sddm
 EOF
 
+###################################
 # Sauvegarde des fichiers requis pour le rendu
 echo "Collecte des informations pour le rendu..."
 mkdir -p /mnt/rendu
