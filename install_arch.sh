@@ -61,14 +61,25 @@ mount /dev/vg0/shared /mnt/shared
 mount /dev/vg0/virtualbox /mnt/virtualbox
 swapon /dev/vg0/swap
 
-# Appliquer les permissions avant le chroot
-echo "Application des permissions sur /mnt/shared avant le chroot..."
+# Création temporaire des utilisateurs pour appliquer les permissions avant le chroot
+echo "Création temporaire des utilisateurs pour appliquer les permissions..."
+if ! grep -q "^fils:" /etc/group; then
+  groupadd fils
+fi
+if ! id pere >/dev/null 2>&1; then
+  useradd -M -g fils pere
+fi
+if ! id fils >/dev/null 2>&1; then
+  useradd -M -g fils fils
+fi
+
+echo "Application des permissions sur /mnt/shared..."
 chmod 770 /mnt/shared
-chown $USER1:$USER2 /mnt/shared
+chown pere:fils /mnt/shared
 
 # Installation du système de base
 echo "Installation des paquets de base..."
-pacstrap /mnt base linux linux-firmware lvm2
+pacstrap /mnt base linux linux-firmware intel-ucode amd-ucode lvm2 networkmanager grub efibootmgr
 
 # Génération du fichier fstab
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -91,11 +102,10 @@ sed -i 's/^HOOKS.*/HOOKS=(base udev autodetect modconf block encrypt lvm2 filesy
 mkinitcpio -P
 
 # Installation de GRUB
-pacman -S --noconfirm grub efibootmgr
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 UUID=\$(blkid -s UUID -o value ${DISK}2)
 sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=\$UUID:cryptlvm root=/dev/vg0/root\"|" /etc/default/grub
-grub-mkconfig -o /boot/grub/grub.cfg
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+grub-mkconfig -o /boot/grub.cfg
 
 # Création des utilisateurs
 useradd -m -G wheel -s /bin/bash $USER1
@@ -104,14 +114,27 @@ useradd -m -s /bin/bash $USER2
 echo "$USER2:$USER_PASS" | chpasswd
 echo "root:$USER_PASS" | chpasswd
 
-# Appliquer les permissions sur /shared dans le chroot
-echo "Application des permissions sur /shared dans le chroot..."
+# Configuration des permissions du dossier partagé
 chmod 770 /shared
 chown $USER1:$USER2 /shared
 
 # Activer les services
 systemctl enable NetworkManager
 EOF
+
+# Suppression des utilisateurs temporaires
+echo "Suppression des utilisateurs temporaires..."
+if id pere >/dev/null 2>&1; then
+  userdel pere
+fi
+
+if id fils >/dev/null 2>&1; then
+  userdel fils
+fi
+
+if getent group fils >/dev/null 2>&1; then
+  groupdel fils
+fi
 
 # Sauvegarde des fichiers requis pour le rendu
 echo "Collecte des informations pour le rendu..."
