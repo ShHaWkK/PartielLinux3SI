@@ -77,7 +77,7 @@ echo "Application des permissions sur /mnt/shared..."
 chmod 770 /mnt/shared
 chown pere:fils /mnt/shared
 
-# Installation du système de base
+# Installation du système 
 echo "Installation des paquets de base..."
 pacstrap /mnt base linux linux-firmware intel-ucode amd-ucode lvm2 networkmanager grub efibootmgr
 
@@ -102,12 +102,14 @@ sed -i 's/^HOOKS.*/HOOKS=(base udev autodetect modconf block encrypt lvm2 filesy
 mkinitcpio -P
 
 # Installation de GRUB
+
 UUID=\$(blkid -s UUID -o value ${DISK}2)
 sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=\$UUID:cryptlvm root=/dev/vg0/root\"|" /etc/default/grub
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub.cfg
 
 # Création des utilisateurs
+
 useradd -m -G wheel -s /bin/bash $USER1
 echo "$USER1:$USER_PASS" | chpasswd
 useradd -m -s /bin/bash $USER2
@@ -122,7 +124,7 @@ chown $USER1:$USER2 /shared
 systemctl enable NetworkManager
 EOF
 
-# Suppression des utilisateurs temporaires
+# Suppression des utilisateurs 
 echo "Suppression des utilisateurs temporaires..."
 if id pere >/dev/null 2>&1; then
   userdel pere
@@ -136,8 +138,8 @@ if getent group fils >/dev/null 2>&1; then
   groupdel fils
 fi
 
-# Sauvegarde des fichiers requis pour le rendu
-echo "Collecte des informations pour le rendu..."
+# Sauvegarde des fichiers 
+echo "Collecte des informations..."
 mkdir -p /mnt/rendu
 lsblk -f > /mnt/rendu/lsblk_f.txt
 cat /mnt/etc/passwd /mnt/etc/group /mnt/etc/fstab /proc/self/mounts > /mnt/rendu/system_files.txt
