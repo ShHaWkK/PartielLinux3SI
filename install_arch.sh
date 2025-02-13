@@ -1,9 +1,9 @@
 #!/bin/bash
 
-set -e  # Arrête le script en cas d'erreur
+set -e  # Stop en cas d'erreur
 LOGFILE="/root/arch_install.log"
 exec > >(tee -a "$LOGFILE") 2>&1
-set -x  # Affiche chaque commande exécutée
+set -x  # Afficher chaque commande exécutée
 
 # ===============================
 # CONFIGURATION
@@ -76,7 +76,9 @@ swapon /dev/vg0/swap
 # INSTALLATION DU SYSTÈME DE BASE
 # ===============================
 echo "Installation des paquets de base..."
-pacstrap /mnt base linux linux-firmware intel-ucode amd-ucode lvm2 networkmanager grub efibootmgr os-prober xorg xorg-xinit hyprland i3 firefox git neovim sddm waybar xdg-desktop-portal-hyprland mako swaylock virtualbox base-devel
+pacstrap /mnt base linux linux-firmware intel-ucode amd-ucode lvm2 networkmanager grub efibootmgr os-prober \
+    xorg xorg-xinit hyprland i3 firefox git neovim sddm waybar xdg-desktop-portal-hyprland mako swaylock \
+    virtualbox base-devel alacritty xfce4-terminal xdg-user-dirs
 
 # ===============================
 # GÉNÉRATION DU FSTAB
@@ -162,6 +164,11 @@ bind = \$mainMod, D, exec, dmenu_run
 bind = \$mainMod, L, exec, swaylock
 HYPRCONF
 chown -R $USER1:$USER1 /home/$USER1/.config
+
+# ===============================
+# FINALISATION
+# ===============================
+xdg-user-dirs-update
 
 EOF
 
