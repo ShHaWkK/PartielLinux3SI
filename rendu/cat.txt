@@ -1,0 +1,130 @@
+Commande : cat /etc/passwd /etc/group /etc/fstab /etc/mtab
+root:x:0:0::/root:/usr/bin/bash
+bin:x:1:1::/:/usr/bin/nologin
+daemon:x:2:2::/:/usr/bin/nologin
+mail:x:8:12::/var/spool/mail:/usr/bin/nologin
+ftp:x:14:11::/srv/ftp:/usr/bin/nologin
+http:x:33:33::/srv/http:/usr/bin/nologin
+nobody:x:65534:65534:Kernel Overflow User:/:/usr/bin/nologin
+dbus:x:81:81:System Message Bus:/:/usr/bin/nologin
+systemd-coredump:x:980:980:systemd Core Dumper:/:/usr/bin/nologin
+systemd-network:x:979:979:systemd Network Management:/:/usr/bin/nologin
+systemd-oom:x:978:978:systemd Userspace OOM Killer:/:/usr/bin/nologin
+systemd-journal-remote:x:977:977:systemd Journal Remote:/:/usr/bin/nologin
+systemd-resolve:x:976:976:systemd Resolver:/:/usr/bin/nologin
+systemd-timesync:x:975:975:systemd Time Synchronization:/:/usr/bin/nologin
+tss:x:974:974:tss user for tpm2:/:/usr/bin/nologin
+uuidd:x:68:68:uuid daemon:/:/usr/bin/nologin
+alpm:x:973:973:Arch Linux Package Management:/:/usr/bin/nologin
+avahi:x:972:972:Avahi mDNS/DNS-SD daemon:/:/usr/bin/nologin
+git:x:971:971:git daemon user:/:/usr/bin/git-shell
+polkitd:x:102:102:User for polkitd:/:/usr/bin/nologin
+rtkit:x:133:133:RealtimeKit:/proc:/usr/bin/nologin
+sddm:x:970:970:SDDM Greeter Account:/var/lib/sddm:/usr/bin/nologin
+pere:x:1000:1000::/home/pere:/bin/bash
+fils:x:1001:1001::/home/fils:/bin/bash
+root:x:0:root
+sys:x:3:bin
+mem:x:8:
+ftp:x:11:
+mail:x:12:
+log:x:19:
+smmsp:x:25:
+proc:x:26:
+games:x:50:
+lock:x:54:
+network:x:90:
+floppy:x:94:
+scanner:x:96:
+power:x:98:
+nobody:x:65534:
+adm:x:999:daemon
+wheel:x:998:pere
+utmp:x:997:
+audio:x:996:
+disk:x:995:
+input:x:994:
+kmem:x:993:
+kvm:x:992:
+lp:x:991:
+optical:x:990:
+render:x:989:
+sgx:x:988:
+storage:x:987:
+tty:x:5:
+uucp:x:986:
+video:x:985:
+users:x:984:
+groups:x:983:
+systemd-journal:x:982:
+rfkill:x:981:
+bin:x:1:daemon
+daemon:x:2:bin
+http:x:33:
+dbus:x:81:
+systemd-coredump:x:980:
+systemd-network:x:979:
+systemd-oom:x:978:
+systemd-journal-remote:x:977:
+systemd-resolve:x:976:
+systemd-timesync:x:975:
+tss:x:974:
+uuidd:x:68:
+polkitd:x:102:
+vboxusers:x:108:
+alpm:x:973:
+avahi:x:972:
+git:x:971:
+rtkit:x:133:
+sddm:x:970:
+pere:x:1000:
+fils:x:1001:
+# Static information about the filesystems.
+# See fstab(5) for details.
+
+# <file system> <dir> <type> <options> <dump> <pass>
+# /dev/mapper/vg0-root
+UUID=f547b2bb-9fb9-4f57-8783-fcadf16bcdb6	/         	ext4      	rw,relatime	0 1
+
+# /dev/sda1
+UUID=356A-3903      	/boot     	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 2
+
+# /dev/mapper/vg0-home
+UUID=d6f5265a-a18b-41e5-afc6-eb56b2c952e1	/home     	ext4      	rw,relatime	0 2
+
+# /dev/mapper/vg0-shared
+UUID=505f6b1c-f9f4-4d6c-9a73-5b24a7053a70	/shared   	ext4      	rw,relatime	0 2
+
+# /dev/mapper/vg0-virtualbox
+UUID=3e0bd1a7-d6bb-4400-9ed8-d1ca6b4c0419	/virtualbox	ext4      	rw,relatime	0 2
+
+# /dev/mapper/vg0-swap
+UUID=c4e90c74-f3cd-40c9-865e-c5626449013c	none      	swap      	defaults  	0 0
+
+proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+sys /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
+dev /dev devtmpfs rw,nosuid,relatime,size=1966448k,nr_inodes=491612,mode=755,inode64 0 0
+run /run tmpfs rw,nosuid,nodev,relatime,mode=755,inode64 0 0
+efivarfs /sys/firmware/efi/efivars efivarfs rw,nosuid,nodev,noexec,relatime 0 0
+/dev/mapper/vg0-root / ext4 rw,relatime 0 0
+securityfs /sys/kernel/security securityfs rw,nosuid,nodev,noexec,relatime 0 0
+tmpfs /dev/shm tmpfs rw,nosuid,nodev,inode64 0 0
+devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000 0 0
+cgroup2 /sys/fs/cgroup cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot 0 0
+pstore /sys/fs/pstore pstore rw,nosuid,nodev,noexec,relatime 0 0
+bpf /sys/fs/bpf bpf rw,nosuid,nodev,noexec,relatime,mode=700 0 0
+systemd-1 /proc/sys/fs/binfmt_misc autofs rw,relatime,fd=41,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=4375 0 0
+debugfs /sys/kernel/debug debugfs rw,nosuid,nodev,noexec,relatime 0 0
+mqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0
+hugetlbfs /dev/hugepages hugetlbfs rw,nosuid,nodev,relatime,pagesize=2M 0 0
+tracefs /sys/kernel/tracing tracefs rw,nosuid,nodev,noexec,relatime 0 0
+tmpfs /run/credentials/systemd-journald.service tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,inode64,noswap 0 0
+configfs /sys/kernel/config configfs rw,nosuid,nodev,noexec,relatime 0 0
+fusectl /sys/fs/fuse/connections fusectl rw,nosuid,nodev,noexec,relatime 0 0
+tmpfs /tmp tmpfs rw,nosuid,nodev,size=1984608k,nr_inodes=1048576,inode64 0 0
+/dev/mapper/vg0-shared /shared ext4 rw,relatime 0 0
+/dev/sda1 /boot vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 0
+/dev/mapper/vg0-virtualbox /virtualbox ext4 rw,relatime 0 0
+/dev/mapper/vg0-home /home ext4 rw,relatime 0 0
+tmpfs /run/user/1000 tmpfs rw,nosuid,nodev,relatime,size=396920k,nr_inodes=99230,mode=700,uid=1000,gid=1000,inode64 0 0
+portal /run/user/1000/doc fuse.portal rw,nosuid,nodev,relatime,user_id=1000,group_id=1000 0 0

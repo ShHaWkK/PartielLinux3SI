@@ -81,7 +81,8 @@ pacstrap /mnt base linux linux-firmware intel-ucode amd-ucode lvm2 networkmanage
     xorg xorg-xinit i3 firefox git neovim sddm waybar xdg-desktop-portal-hyprland mako swaylock \
     virtualbox base-devel alacritty xdg-user-dirs rofi starship dmenu picom \
     ttf-dejavu noto-fonts pavucontrol pulseaudio pulseaudio-alsa pulseaudio-bluetooth \
-    vim htop neofetch curl wget fzf gcc make gdb clang
+    vim htop neofetch curl wget fzf gcc make gdb clang nano openssh
+
 
 # ===============================
 # GÉNÉRATION DU FSTAB
@@ -129,7 +130,21 @@ useradd -m -s /bin/bash "$USER2"
 echo "$USER2:$USER_PASS" | chpasswd
 echo "root:$USER_PASS" | chpasswd
 
+
+# ===============================
+# CONFIGURATION DES PERMISSIONS POUR /shared
+# ===============================
+
+groupadd shared 
+
+usermod -aG shared "$USER1"
+usermod -aG shared "$USER2"
+
+mkdir -p /shared
+chown -R "$USER1:shared" /shared
 chmod 770 /shared
+chmod g+s /shared
+
 chown -R "$USER1:$USER1" /home/$USER1
 chown -R "$USER2:$USER2" /home/$USER2
 
@@ -162,7 +177,7 @@ chown -R "$USER1:$USER1" /home/$USER1/.config
 # Configuration .XINITRC
 echo "exec i3" > /home/$USER1/.xinitrc
 chmod +x /home/$USER1/.xinitrc
-chown "$USER1:$USER1" /home/$USER1/.xinitrcs
+chown "$USER1:$USER1" /home/$USER1/.xinitrc
 
 
 # ===============================

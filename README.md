@@ -79,28 +79,6 @@ Nous avons pris en compte les spécifications suivantes fournies par le sujet :
   - Activer UEFI (EFI activé dans les paramètres de la VM).
 - **Télécharger l’ISO Arch Linux** depuis [archlinux.org](https://archlinux.org/download/).
 
-### **Utilisation du script**
-#### **Avec un ISO modifié :**
-
-Modifiez l’ISO Arch Linux pour inclure le script d’installation (`install_arch.sh`) dans `/root`.
-
-Configurez le fichier `/etc/systemd/system/getty@tty1.service.d/override.conf` pour exécuter le script automatiquement au démarrage :
-   ```ini
-   [Service]
-   ExecStart=
-   ExecStart=/bin/bash -c "/root/install_arch.sh"
-   Démarrez la VM avec cet ISO modifié. Le script se lancera automatiquement.
-   ```
-
-
-Lancez l’ISO Arch Linux sur la VM.
-Montez une clé USB contenant le script install_arch.sh ou téléchargez-le via SFTP.
-
-```
-chmod +x install_arch.sh
-./install_arch.sh
-
-```
 # Vérifications après installation
 
 Après redémarrage de la machine, vérifiez les éléments suivants :
@@ -112,22 +90,4 @@ Après redémarrage de la machine, vérifiez les éléments suivants :
 - Vérifiez que les outils demandés (ex. : firefox, virtualbox) sont installés.
 
 ## Résultats attendus
-
-Nous devons générer les fichiers demandés pour le rendu :
-
-## Liste des partitions :
-
-lsblk -f > lsblk_f.txt
-
-### Informations système :
-
-cat /etc/passwd /etc/group /etc/fstab /etc/mtab > system_files.txt
-
-### Nom d’hôte :
-
-echo $HOSTNAME > hostname.txt
-
-
-### Liste des paquets installés :
-
-grep -i installed /var/log/pacman.log > pacman_installed.txt
+Dans le dossier rendu et dans images. 
