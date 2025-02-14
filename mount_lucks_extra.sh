@@ -1,3 +1,6 @@
+# Il me faut impérativement un espace chiffré que je dois monter à la main, sait-on jamais ! [...] Un bon
+# 10G minimum ferait pas de mal, je pense.
+
 cat <<EOF > /home/$USER1/mount_lucks_extra.sh
 
 #!/bin/bash
