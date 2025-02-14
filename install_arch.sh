@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e  # Stop en cas d'erreur
+set -e  # Arrêt en cas d'erreur
 LOGFILE="/root/arch_install.log"
 exec > >(tee -a "$LOGFILE") 2>&1
 set -x  # Afficher chaque commande exécutée
@@ -16,6 +16,7 @@ USER1="pere"
 USER2="fils"
 USER_PASS="azerty123"
 LUKS_PASS="azerty123"
+DNS="1.1.1.1"
 
 echo "### Début de l'installation d'Arch Linux ###"
 
@@ -40,14 +41,14 @@ echo -n "$LUKS_PASS" | cryptsetup open "$LVM_PART" cryptlvm
 # CONFIGURATION LVM
 # ===============================
 echo "Création des volumes logiques..."
-pvcreate /dev/mapper/cryptlvm
-vgcreate vg0 /dev/mapper/cryptlvm
-lvcreate -L 18G vg0 -n root
-lvcreate -L 6G vg0 -n swap
-lvcreate -L 30G vg0 -n home
-lvcreate -L 10G vg0 -n luks_extra
-lvcreate -L 5G vg0 -n shared
-lvcreate -L 10G vg0 -n virtualbox
+pvcreate /dev/mapper/cryptlvm # Partition chiffrée
+vgcreate vg0 /dev/mapper/cryptlvm # Groupe de volumes
+lvcreate -L 18G vg0 -n root # Partition racine
+lvcreate -L 6G vg0 -n swap # Partition swap
+lvcreate -L 30G vg0 -n home # Volume home chiffré
+lvcreate -L 10G vg0 -n luks_extra  # Volume chiffré manuel
+lvcreate -L 5G vg0 -n shared  # Dossier partagé entre père et fils
+lvcreate -L 10G vg0 -n virtualbox  # Stockage dédié VirtualBox
 
 # ===============================
 # FORMATAGE DES VOLUMES LOGIQUES
@@ -77,8 +78,10 @@ swapon /dev/vg0/swap
 # ===============================
 echo "Installation des paquets de base..."
 pacstrap /mnt base linux linux-firmware intel-ucode amd-ucode lvm2 networkmanager grub efibootmgr os-prober \
-    xorg xorg-xinit hyprland i3 firefox git neovim sddm waybar xdg-desktop-portal-hyprland mako swaylock \
-    virtualbox base-devel alacritty xfce4-terminal xdg-user-dirs
+    xorg xorg-xinit i3 firefox git neovim sddm waybar xdg-desktop-portal-hyprland mako swaylock \
+    virtualbox base-devel alacritty xdg-user-dirs rofi starship dmenu picom \
+    ttf-dejavu noto-fonts pavucontrol pulseaudio pulseaudio-alsa pulseaudio-bluetooth \
+    vim htop neofetch curl wget fzf gcc make gdb clang
 
 # ===============================
 # GÉNÉRATION DU FSTAB
@@ -100,6 +103,9 @@ locale-gen
 echo "LANG=fr_FR.UTF-8" > /etc/locale.conf
 echo "KEYMAP=fr" > /etc/vconsole.conf
 
+# Configuration DNS
+echo "nameserver $DNS" > /etc/resolv.conf
+
 # ===============================
 # CONFIGURATION INITRAMFS
 # ===============================
@@ -107,68 +113,90 @@ sed -i 's/^HOOKS.*/HOOKS=(base udev autodetect modconf block encrypt lvm2 filesy
 mkinitcpio -P
 
 # ===============================
-# INSTALLATION ET CONFIGURATION DE GRUB
+# CONFIGURATION GRUB
 # ===============================
-echo "Installation et configuration de GRUB..."
 UUID=\$(blkid -s UUID -o value "$LVM_PART")
-
 sed -i "s|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=\$UUID:cryptlvm root=/dev/vg0/root\"|" /etc/default/grub
-
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --recheck --modules="lvm luks2 part_gpt"
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --recheck
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # ===============================
 # CRÉATION DES UTILISATEURS
 # ===============================
-useradd -m -G wheel -s /bin/bash $USER1
+useradd -m -G wheel -s /bin/bash "$USER1"
 echo "$USER1:$USER_PASS" | chpasswd
-useradd -m -s /bin/bash $USER2
+useradd -m -s /bin/bash "$USER2"
 echo "$USER2:$USER_PASS" | chpasswd
 echo "root:$USER_PASS" | chpasswd
 
-# Permissions du dossier partagé
 chmod 770 /shared
-chown $USER1:$USER2 /shared
-
-# Activer les services essentiels
-systemctl enable NetworkManager
-systemctl enable sddm
+chown -R "$USER1:$USER1" /home/$USER1
+chown -R "$USER2:$USER2" /home/$USER2
 
 # ===============================
-# INSTALLATION DE YAY ET WLOGOUT
+# CONFIGURATION I3
+# ===============================
+mkdir -p /home/$USER1/.config/i3
+mkdir -p /home/$USER1/.config  # Correction ici
+
+cat <<I3CONF > /home/$USER1/.config/i3/config
+set \\\$mod Mod4
+font pango:DejaVu Sans Mono 10
+bindsym \\\$mod+Return exec alacritty
+bindsym \\\$mod+d exec rofi -show drun
+bindsym \\\$mod+Shift+q kill
+bindsym \\\$mod+Shift+r restart
+bindsym \\\$mod+f fullscreen toggle
+
+bar {
+    status_command i3status
+}
+
+exec --no-startup-id picom
+exec --no-startup-id nm-applet
+exec --no-startup-id setxkbmap fr
+I3CONF
+
+chown -R "$USER1:$USER1" /home/$USER1/.config
+
+# Configuration .XINITRC
+echo "exec i3" > /home/$USER1/.xinitrc
+chmod +x /home/$USER1/.xinitrc
+chown "$USER1:$USER1" /home/$USER1/.xinitrcs
+
+
+# ===============================
+# Configuration .BASHRC 
+# ===============================
+
+cat <<BASHRC > /home/$USER1/.bashrc
+eval "\$(starship init bash)"
+alias ll="ls -la --color=auto"
+alias update="sudo pacman -Syu"
+alias ..="cd .."
+alias ...="cd ../.."
+PS1="\[\e[1;34m\]\u@\h\[\e[0m\] \[\e[1;32m\]\w\[\e[0m\]\n\$ "
+BASHRC
+cp /home/$USER1/.bashrc /home/$USER2/.bashrc
+chown "$USER1:$USER1" /home/$USER1/.bashrc
+chown "$USER2:$USER2" /home/$USER2/.bashrc
+
+# ===============================
+# INSTALLATION DE YAY
 # ===============================
 echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 pacman -S --noconfirm git base-devel
-
 git clone https://aur.archlinux.org/yay.git /opt/yay
-chown -R $USER1:$USER1 /opt/yay
-su - $USER1 -c "cd /opt/yay && makepkg -si --noconfirm"
-su - $USER1 -c "yay -S --noconfirm wlogout"
-
-# ===============================
-# CONFIGURATION DE HYPRLAND
-# ===============================
-mkdir -p /home/$USER1/.config/hypr
-cat <<HYPRCONF > /home/$USER1/.config/hypr/hyprland.conf
-exec firefox
-env = XDG_SESSION_TYPE, wayland
-env = XDG_CURRENT_DESKTOP, Hyprland
-env = QT_QPA_PLATFORM, wayland
-env = QT_WAYLAND_DISABLE_WINDOWDECORATIONS, 1
-env = WLR_NO_HARDWARE_CURSORS, 1
-
-mainMod=SUPER
-bind = \$mainMod, RETURN, exec, alacritty
-bind = \$mainMod SHIFT, Q, killactive
-bind = \$mainMod, D, exec, dmenu_run
-bind = \$mainMod, L, exec, swaylock
-HYPRCONF
-chown -R $USER1:$USER1 /home/$USER1/.config
+chown -R "$USER1:$USER1" /opt/yay
+su - "$USER1" -c "cd /opt/yay && makepkg -si --noconfirm"
+su - "$USER1" -c "yay -S --noconfirm wlogout"
 
 # ===============================
 # FINALISATION
 # ===============================
 xdg-user-dirs-update
+systemctl enable NetworkManager
+systemctl enable sddm
 
 EOF
 
