@@ -1,0 +1,6 @@
+eval "eval -- "$(/usr/bin/starship init bash --print-full-init)""
+alias ll="ls -la --color=auto"
+alias update="sudo pacman -Syu"
+alias ..="cd .."
+alias ...="cd ../.."
+PS1="\[\e[1;34m\]\u@\h\[\e[0m\] \[\e[1;32m\]\w\[\e[0m\]\n$ "
